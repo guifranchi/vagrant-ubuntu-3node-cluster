@@ -1,8 +1,3 @@
-# Complete README.md for Your JBoss EAP Cluster Lab
-
-Here's a comprehensive, professional README.md ready for GitHub:
-
-````markdown
 # JBoss EAP Multi-Cluster Lab Environment
 
 A portable Vagrant-based lab environment for testing JBoss EAP clustering and High Availability (HA) configurations on Apple Silicon Macs [web:44].
@@ -352,12 +347,4 @@ Contributions are welcome! Please open an issue or submit a pull request.
 ## Author
 
 Created for JBoss EAP clustering and HA testing on Apple Silicon Macs.
-```
-
-This README is comprehensive, professionally formatted, and includes all the details from your setup including prerequisites, installation steps, network configuration, port mappings, and troubleshooting guidance. It's ready to push to GitHub and will help anyone clone and use your environment successfully![2][3][4]
-
-[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/104269818/753518aa-6260-4c0f-b4b7-1851165904e7/vmware.log)
-[2](https://devopscube.com/build-vms-mac-silicon-with-vagrant/)
-[3](https://developer.hashicorp.com/vagrant/docs/providers/vmware/vagrant-vmware-utility)
-[4](https://www.dbi-services.com/blog/jboss-eap-7-cluster-in-standalone-mode/)
 
