@@ -1,4 +1,16 @@
+# Vagrant
 .vagrant/
 *.box
 *.log
+
+# SSH keys (generated during provisioning)
+.ssh/
+
+# Vagrant synced folders
+.vagrant.d/
+
+# Temporary files
+*.tmp
+*.swp
+*~
 
