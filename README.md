@@ -1,6 +1,6 @@
 # JBoss EAP Multi-Cluster Lab Environment
 
-A portable Vagrant-based lab environment for testing JBoss EAP clustering and High Availability (HA) configurations on Apple Silicon Macs [web:44].
+A portable Vagrant-based lab environment for testing JBoss EAP clustering and High Availability (HA) configurations on Apple Silicon Macs.
 
 ## Overview
 
@@ -27,16 +27,16 @@ This project provides a reproducible, three-node cluster environment specificall
 ## Prerequisites
 
 - **macOS** with Apple Silicon (M1/M2/M3/M4)
-- **VMware Fusion** (Free for personal use) [web:44]
+- **VMware Fusion** (Free for personal use)
 - **Vagrant** 2.4.7 or later
-- **Vagrant VMware Utility** [web:49]
+- **Vagrant VMware Utility**
 - **vagrant-vmware-desktop plugin**
 
 ### Installation Steps
 
 #### 1. Install VMware Fusion Pro
 
-Download VMware Fusion Pro (free for personal use) from Broadcom [web:44].
+Download VMware Fusion Pro (free for personal use) from Broadcom.
 
 #### 2. Install Vagrant
 
@@ -186,7 +186,7 @@ echo $JAVA_HOME
 
 ### Installing JBoss EAP
 
-Once your nodes are running, you can install JBoss EAP on each node [web:16]:
+Once your nodes are running, you can install JBoss EAP on each node:
 
 ```
 # SSH into each node
@@ -206,7 +206,7 @@ sudo chown -R vagrant:vagrant /opt/wildfly
 
 ### Clustering Configuration
 
-For JBoss EAP clustering in standalone-ha mode, use these bind addresses [web:16]:
+For JBoss EAP clustering in standalone-ha mode, use these bind addresses:
 
 ```
 # Example startup for node1
