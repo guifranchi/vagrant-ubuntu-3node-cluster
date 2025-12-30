@@ -44,7 +44,84 @@ Vagrant.configure("2") do |config|
 EOF
     
     echo "Hostname resolution configured!"
-    cat /etc/hosts
+  SCRIPT
+
+  # Setup SSH keys - this runs on all nodes
+  $setup_ssh = <<-SCRIPT
+    echo "Setting up SSH for passwordless access..."
+    
+    # Enable root login
+    sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    systemctl restart ssh
+    
+    # Create SSH directories
+    mkdir -p /root/.ssh
+    chmod 700 /root/.ssh
+    mkdir -p /home/vagrant/.ssh
+    chmod 700 /home/vagrant/.ssh
+    chown vagrant:vagrant /home/vagrant/.ssh
+    
+    # Create a shared SSH key pair for the cluster
+    # This is the private key (same for all nodes)
+    cat > /root/.ssh/id_rsa <<'SSHKEY'
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
+NhAAAAAwEAAQAAAYEAzXrCLfvv5qXKJlL5RHCqJKUGCmB0K8M8R5PvPIxvF8HQd8LvNfDK
+8KN3h7ZnYvPJZxvYL5lK3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8
+xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L
+3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9
+VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8x
+QY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3
+PvH2YmFH9VzZK7YQG8xQY5Bv7Z8L3PvH2YmFH9VzZK7YAAAA
+-----END OPENSSH PRIVATE KEY-----
+SSHKEY
+
+    # This is a simpler approach: generate a new key on first node
+    if [ ! -f /vagrant/.ssh/cluster_rsa ]; then
+      mkdir -p /vagrant/.ssh
+      ssh-keygen -t rsa -b 2048 -N "" -f /vagrant/.ssh/cluster_rsa -C "cluster-key"
+    fi
+    
+    # Copy the shared keys
+    cp /vagrant/.ssh/cluster_rsa /root/.ssh/id_rsa
+    cp /vagrant/.ssh/cluster_rsa.pub /root/.ssh/id_rsa.pub
+    cp /vagrant/.ssh/cluster_rsa /home/vagrant/.ssh/id_rsa
+    cp /vagrant/.ssh/cluster_rsa.pub /home/vagrant/.ssh/id_rsa.pub
+    
+    # Set correct permissions
+    chmod 600 /root/.ssh/id_rsa
+    chmod 644 /root/.ssh/id_rsa.pub
+    chmod 600 /home/vagrant/.ssh/id_rsa
+    chmod 644 /home/vagrant/.ssh/id_rsa.pub
+    chown vagrant:vagrant /home/vagrant/.ssh/id_rsa*
+    
+    # Add the public key to authorized_keys
+    cat /vagrant/.ssh/cluster_rsa.pub >> /root/.ssh/authorized_keys
+    cat /vagrant/.ssh/cluster_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+    chmod 600 /root/.ssh/authorized_keys
+    chmod 600 /home/vagrant/.ssh/authorized_keys
+    chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys
+    
+    # Configure SSH to not check host keys within cluster
+    cat > /root/.ssh/config <<EOF
+Host 192.168.56.* jboss-node*
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+EOF
+    chmod 600 /root/.ssh/config
+    
+    cat > /home/vagrant/.ssh/config <<EOF
+Host 192.168.56.* jboss-node*
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+EOF
+    chmod 600 /home/vagrant/.ssh/config
+    chown vagrant:vagrant /home/vagrant/.ssh/config
+    
+    echo "SSH setup complete!"
   SCRIPT
 
   # Define node1
@@ -64,9 +141,9 @@ EOF
       vmware.vmx["displayname"] = "jboss-node1"
     end
     
-    # Provision Java and hosts
     node1.vm.provision "shell", inline: $install_java
     node1.vm.provision "shell", inline: $configure_hosts
+    node1.vm.provision "shell", inline: $setup_ssh
   end
 
   # Define node2
@@ -86,9 +163,9 @@ EOF
       vmware.vmx["displayname"] = "jboss-node2"
     end
     
-    # Provision Java and hosts
     node2.vm.provision "shell", inline: $install_java
     node2.vm.provision "shell", inline: $configure_hosts
+    node2.vm.provision "shell", inline: $setup_ssh
   end
 
   # Define node3
@@ -108,9 +185,10 @@ EOF
       vmware.vmx["displayname"] = "jboss-node3"
     end
     
-    # Provision Java and hosts
     node3.vm.provision "shell", inline: $install_java
     node3.vm.provision "shell", inline: $configure_hosts
+    node3.vm.provision "shell", inline: $setup_ssh
   end
 end
+
 
